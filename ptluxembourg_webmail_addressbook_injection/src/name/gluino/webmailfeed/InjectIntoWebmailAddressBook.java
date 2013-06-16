@@ -1,15 +1,9 @@
 package name.gluino.webmailfeed;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
+import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -19,6 +13,7 @@ import org.openqa.selenium.support.ui.Select;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.mplify.checkers._check;
 import com.mplify.logging.LogFacilities;
 import com.mplify.logstarter.LogbackStarter;
 import com.mplify.utils.Sleep;
@@ -47,47 +42,22 @@ public class InjectIntoWebmailAddressBook {
 
     private final static String CLASS = InjectIntoWebmailAddressBook.class.getName();
     private final static Logger LOGGER_loginToWebmail = LoggerFactory.getLogger(CLASS + ".loginToWebmail");
-    private final static Logger LOGGER_gotoWebmailPage = LoggerFactory.getLogger(CLASS + ".gotoWebmailPage");
+    private final static Logger LOGGER_goToWebmailLoginPage = LoggerFactory.getLogger(CLASS + ".goToWebmailLoginPage");
     private final static Logger LOGGER_createAddressbook = LoggerFactory.getLogger(CLASS + ".createAddressbook");
     private final static Logger LOGGER_logoutFromWebmail = LoggerFactory.getLogger(CLASS + ".logoutFromWebmail");
+    private final static Logger LOGGER_openContactsMenu = LoggerFactory.getLogger(CLASS + ".openContactsMenu");
+    private final static Logger LOGGER_makeSureFolderDoesNotExist = LoggerFactory.getLogger(CLASS + ".makeSureFolderDoesNotExist");
+    private final static Logger LOGGER_addNewFolder = LoggerFactory.getLogger(CLASS + ".addNewFolder");
+    private final static Logger LOGGER_makeSureFolderDoesExist = LoggerFactory.getLogger(CLASS + ".makeSureFolderDoesExist");
+    private final static Logger LOGGER_enterFolder = LoggerFactory.getLogger(CLASS + ".enterFolder");
+    private final static Logger LOGGER_enterRelevantContacts = LoggerFactory.getLogger(CLASS + ".enterRelevantContacts");
 
-    private final static PropertiesReader config; // immutable configuration
-    private final static Set<ClubMember> allMembers; // immutable set of all the club members
+    private final PropertiesReader config; // immutable configuration
+    private final Set<ClubMember> allMembers; // immutable set of all the club members
+    private final WebDriver driver;
 
-    /**
-     * Static constructor hoovers up configuration data from "config.xml" and also configures 
-     * some immutable maps.
-     */
-
-    static {
-        //
-        // Fire up logging through "SLF4J" over "Logback"
-        // This looks like a zero-effect statement but it's actually an initialization
-        //
-        {
-            Object foo = new LogbackStarter(InjectIntoWebmailAddressBook.class);
-        }
-        //
-        // The resource "config.xml" in the package in which "Hook" resides is read and a directly
-        // usable structure is returned.
-        //
-        config = new PropertiesReader(name.gluino.webmailfeed.data.Hook.class, "config.xml");
-        //
-        // Hoover up all the member information and put it into a Set<Member>
-        //
-        try {
-            allMembers = (new MemberListSlurper(config.getFqInputResource(), config.getCommitteEmails())).members;
-        } catch (Exception exe) {
-            throw new IllegalStateException(exe);
-        }
-    }
-
-    /**
-     * Of of the "tests" (i.e. runs of website interaction) uses a new "WebDriver".
-     * We have a Firefox installation with the Selenium plugin, so it will be the "FirefoxDriver()"
-     */
-
-    private WebDriver driver;
+    private final int DOG_SLOW_SECONDS = 60;
+    private final int MEDIUM_SLOW_SECONDS = 30;
 
     /**
      * We also have a simple facility to store several problems in a string buffer
@@ -97,25 +67,27 @@ public class InjectIntoWebmailAddressBook {
     private StringBuffer verificationErrors = new StringBuffer();
 
     /**
-     * Set up before each test (this is called on a new instance of AddContact)
+     * Constructor
      */
 
-    @Before
-    public void setUp() {
-        driver = new FirefoxDriver();
-        driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+    public InjectIntoWebmailAddressBook(PropertiesReader config, Set<ClubMember> allMembers) {
+        _check.notNull(config, "config");
+        _check.notNull(allMembers, "allMembers");
+        this.config = config;
+        this.allMembers = Collections.unmodifiableSet(allMembers);
+        this.driver = new FirefoxDriver();
+        this.driver.manage().timeouts().implicitlyWait(DOG_SLOW_SECONDS, TimeUnit.SECONDS);
     }
 
     /**
      * Cleaning up after a "test" function has been run
      */
 
-    @After
     public void tearDown() {
         driver.quit();
         String verificationErrorString = verificationErrors.toString();
         if (!"".equals(verificationErrorString)) {
-            fail(verificationErrorString);
+            _check.fail(verificationErrorString);
         }
     }
 
@@ -123,37 +95,120 @@ public class InjectIntoWebmailAddressBook {
      * Helper
      */
 
-    private void gotoWebmailPage(String baseUrl) {
-        Logger logger = LOGGER_gotoWebmailPage;
-        logger.info("Now going to: " + baseUrl);
-        driver.get(baseUrl);
-        driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-        // check that the page is up
+    private void goToWebmailLoginPage() {
+        Logger logger = LOGGER_goToWebmailLoginPage;
+        logger.info("Opening login page at " + config.getBaseURL());
+        driver.manage().timeouts().implicitlyWait(MEDIUM_SLOW_SECONDS, TimeUnit.SECONDS);
+        driver.get(config.getBaseURL() + "/webmail");
+        //
+        // On return, check that the login page is up
+        //
         String text = driver.findElement(By.cssSelector("BODY")).getText();
         logger.info("Text in BODY: '" + LogFacilities.mangleString(text) + "'");
-        assertTrue(text.contains("Webmail Login"));
-        assertTrue(text.contains("Entreprise des P&T"));
+        _check.isTrue(text.contains("Webmail Login"), "Did not find 'Webmail Login'");
+        _check.isTrue(text.contains("Entreprise des P&T"), "Did not find 'Entreprise des P&T'");
+        logger.info("Apparently the login page is visible");
     }
 
     /**
      * Helper
      */
 
-    private void loginToWebmail(String username, String password) {
+    private void loginToWebmail() {
         Logger logger = LOGGER_loginToWebmail;
+        logger.info("Logging in");
         driver.findElement(By.name("user")).clear();
-        driver.findElement(By.name("user")).sendKeys(username);
+        driver.findElement(By.name("user")).sendKeys(config.getUsername());
         driver.findElement(By.name("password")).clear();
-        driver.findElement(By.name("password")).sendKeys(password);
+        driver.findElement(By.name("password")).sendKeys(config.getPassword());
         new Select(driver.findElement(By.name("lang"))).selectByVisibleText("English");
         driver.findElement(By.cssSelector("button[type=\"submit\"]")).click();
-        // We should be logged in now
+        Sleep.sleepTwoSeconds();
+        //
+        // On return, we should be logged in
+        //
+        driver.get(config.getBaseURL() + "/webmail/overview");
         String title = driver.getTitle();
         logger.info("Title of page: '" + LogFacilities.mangleString(title) + "'");
-        assertTrue(title.matches(".*?P&T\u00A0Luxembourg\u00A0Webmail.*?"));
+        _check.isTrue(title.matches(".*?P&T\u00A0Luxembourg\u00A0Webmail.*?"), "Looked for P&T Luxembourg Webmail string");
         String text = driver.findElement(By.cssSelector("BODY")).getText();
         logger.info("Text in BODY: '" + LogFacilities.mangleString(text) + "'");
-        assertTrue(text.contains("Logged in as: " + username + " | Logout |"));
+        _check.isTrue(text.contains(config.getUsername()), "Looked for '" + config.getUsername() + "'");
+        _check.isTrue(text.contains("Logout"), "Looked for 'Logout'");
+        //
+        // The icon for "contacts" should be there
+        //
+        _check.isTrue(isElementPresent(By.cssSelector("span.icon_manager.navigation_addr")), "The 'Contacts' icon is there");
+        logger.info("Apparently we are logged in");
+    }
+
+    /**
+     * Helper
+     */
+
+    private boolean isElementPresent(By by) {
+        try {
+            driver.findElement(by);
+            return true;
+        } catch (NoSuchElementException e) {
+            return false;
+        }
+    }
+    
+
+    private void waitForExportImportInAddressBookMenu() {
+      for (int second = 0;; second++) {
+          _check.isFalse(second >= 60, "timeout");
+          try { if (isElementPresent(By.id("text_action_export"))) break; } catch (Exception e) { 
+              // NOP          
+              
+          }
+          Sleep.sleepHalfASecond();
+      }
+
+      for (int second = 0;; second++) {
+          _check.isFalse(second >= 60, "timeout");
+          try { if (isElementPresent(By.id("text_action_import_addrimport"))) break; } catch (Exception e) {
+              // NOP
+          }
+          Sleep.sleepHalfASecond();
+      }
+
+    }
+
+    /**
+     * Helper
+     */
+
+    private void openContactsMenu() {
+        Logger logger = LOGGER_openContactsMenu;
+        logger.info("Opening contacts menu");
+        driver.findElement(By.cssSelector("span.icon_manager.navigation_addr")).click();
+        Sleep.sleepTwoSeconds();
+        //
+        // On return, the web page should be in "address book mode".
+        // Finding out that this is so is kind difficult.
+        //
+        _check.isTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Contacts[\\s\\S]*$"), "Looked for 'Contacts'");
+        waitForExportImportInAddressBookMenu();
+        _check.isTrue(isElementPresent(By.id("icon_action_add_folder")), "Add folder icon should be there");        
+        //
+        // Click at least twice then click once more if "Contacts" is not yet there
+        //
+        driver.findElement(By.xpath("(//a[contains(text(),'" + config.getUsername() + "')])[2]")).click();
+        Sleep.sleepTwoSeconds();
+        driver.findElement(By.xpath("(//a[contains(text(),'" + config.getUsername() + "')])[2]")).click();
+        Sleep.sleepTwoSeconds();
+        if (!isElementPresent(By.xpath("//a[contains(text(),'Contacts')]"))) {
+            driver.findElement(By.xpath("(//a[contains(text(),'" + config.getUsername() + "')])[2]")).click();
+            Sleep.sleepTwoSeconds();
+        }
+        //
+        // Contacts must now be there
+        //
+        _check.isTrue(isElementPresent(By.xpath("//a[contains(text(),'Contacts')]")), "Was looking for 'Contacts'");
+        logger.info("Apparently 'Contacts' are now visible");
+
     }
 
     /**
@@ -162,36 +217,103 @@ public class InjectIntoWebmailAddressBook {
 
     private void logoutFromWebmail() {
         Logger logger = LOGGER_logoutFromWebmail;
+        logger.info("Logging out");
         driver.findElement(By.linkText("Logout")).click();
         Sleep.sleepTwoSeconds();
         String text = driver.findElement(By.cssSelector("BODY")).getText();
         logger.info("Text in BODY: '" + LogFacilities.mangleString(text) + "'");
-        assertTrue(text.contains("Webmail Login"));
-        assertTrue(text.contains("Entreprise des P&T"));
+        _check.isTrue(text.contains("Webmail Login"), "Did not find 'Webmail Login'");
+        _check.isTrue(text.contains("Entreprise des P&T"), "Did not find 'Entreprise des P&T'");
+        logger.info("Apparently logged out");
     }
 
     /**
      * Helper
      */
 
-    private void createAddressbook(String foldername, Acceptor acceptor) {
-        Logger logger = LOGGER_createAddressbook;
-        gotoWebmailPage(config.getBaseURL());
-        loginToWebmail(config.getUsername(), config.getPassword());
-        driver.findElement(By.cssSelector("span.icon_manager.navigation_addr")).click();
-        Sleep.sleepTwoSeconds();
+    private void makeSureFolderDoesNotExist(String foldername) {
+        Logger logger = LOGGER_makeSureFolderDoesNotExist;
+        logger.info("Making sure there is no folder '" + foldername + "'");
+        // for some reason this tkes a LONG time
+        _check.isFalse(isElementPresent(By.xpath("//a[contains(text(),'" + foldername + "')]")), "Was looking for '" + foldername + "'");
+        logger.info("Apparently there is no folder '" + foldername + "'");
+    }
+
+    /**
+     * Helper
+     */
+
+    private void makeSureFolderDoesExist(String foldername) {
+        Logger logger = LOGGER_makeSureFolderDoesExist;
+        logger.info("Making sure there is a folder '" + foldername + "'");
+        _check.isTrue(isElementPresent(By.xpath("//a[contains(text(),'" + foldername + "')]")), "Was looking for '" + foldername + "'");
+        logger.info("Apparently there is a folder '" + foldername + "'");
+    }
+
+    /**
+     * Helper
+     */
+
+    private void addNewFolder(String foldername) {
+        Logger logger = LOGGER_addNewFolder;
         driver.findElement(By.id("icon_action_add_folder")).click();
         Sleep.sleepTwoSeconds();
+        _check.isTrue(isElementPresent(By.id("_button_cancel")), "Looked for CANCEL button");
+        _check.isTrue(isElementPresent(By.id("_button_save")), "Looked for SAVE button");
+        _check.isTrue(isElementPresent(By.id("parent")), "Looked for 'parent folder' entry field");
+        _check.isTrue(isElementPresent(By.id("name")), "Looked for 'name' entry field");
         driver.findElement(By.id("name")).clear();
         driver.findElement(By.id("name")).sendKeys(foldername);
-        new Select(driver.findElement(By.id("parent"))).selectByVisibleText(config.getUserEmail());
         driver.findElement(By.id("_button_save")).click();
         Sleep.sleepTwoSeconds();
+        logger.info("Apparently folder '" + foldername + "' has been added");
+    }
+
+    /**
+     * Helper
+     */
+
+    private void enterFolder(String foldername) {
+        Logger logger = LOGGER_enterFolder;
+        waitForExportImportInAddressBookMenu();
+        logger.info("Trying to enter '" + foldername + "'");
+        driver.findElement(By.cssSelector("span.icon_manager.navigation_mail")).click();
+        Sleep.sleepTwoSeconds();
+        driver.findElement(By.cssSelector("span.icon_manager.navigation_addr")).click();
+        Sleep.sleepTwoSeconds();
+        //
+        // Click at least twice then click once more if "Contacts" is not yet there
+        //
+        driver.findElement(By.xpath("(//a[contains(text(),'" + config.getUsername() + "')])[2]")).click();
+        Sleep.sleepTwoSeconds();
+        driver.findElement(By.xpath("(//a[contains(text(),'" + config.getUsername() + "')])[2]")).click();
+        Sleep.sleepTwoSeconds();
+        if (!isElementPresent(By.xpath("//a[contains(text(),'" + foldername + "')]"))) {
+            driver.findElement(By.xpath("(//a[contains(text(),'" + config.getUsername() + "')])[2]")).click();
+            Sleep.sleepTwoSeconds();
+        }
+        driver.findElement(By.xpath("//a[contains(text(),'" + foldername + "')]")).click();
+        Sleep.sleepTwoSeconds();
+        
+        _check.isTrue(isElementPresent(By.id("icon_action_add")), "Looked for 'icon_action_add' action");
+        _check.isTrue(driver.findElement(By.cssSelector("BODY")).getText().contains(foldername), "Looked for '" + foldername + "'");
+        _check.isTrue(driver.findElement(By.cssSelector("BODY")).getText().contains("No items"), "Looked for 'No items'");
+        logger.info("Apparently we are ready to enter contacts");
+    }
+
+    /**
+     * Helper
+     */
+
+    private void enterRelevantContacts(Acceptor acceptor) {
+        Logger logger = LOGGER_enterRelevantContacts;
         for (ClubMember m : allMembers) {
             if (acceptor.accept(m)) {
                 int count = 0;
                 for (String addr : m.emailAddressList) {
+                    logger.info("Trying to add " + m);
                     driver.findElement(By.id("icon_action_add")).click();
+                    Sleep.sleepTwoSeconds();
                     driver.findElement(By.id("firstname")).clear();
                     driver.findElement(By.id("firstname")).sendKeys(m.firstName);
                     driver.findElement(By.id("lastname")).clear();
@@ -206,23 +328,39 @@ public class InjectIntoWebmailAddressBook {
                     driver.findElement(By.id("company")).clear();
                     driver.findElement(By.id("company")).sendKeys(acceptor.getCompany(m));
                     driver.findElement(By.id("_button_save")).click();
+                    Sleep.sleepTwoSeconds();
+                    logger.info("Looks like this succeeded!");
                 }
             }
         }
-        logoutFromWebmail();
     }
 
     /**
      * Helper
      */
 
-    private boolean isElementPresent(By by) {
-        try {
-            driver.findElement(by);
-            return true;
-        } catch (NoSuchElementException e) {
-            return false;
-        }
+    private void createAddressbook(String foldername, Acceptor acceptor) {
+        Logger logger = LOGGER_createAddressbook;
+        //
+        goToWebmailLoginPage();
+        //
+        loginToWebmail();
+        //
+        openContactsMenu();
+        //
+        makeSureFolderDoesNotExist(foldername);
+        //
+        addNewFolder(foldername);
+        //
+        openContactsMenu();
+        //
+        makeSureFolderDoesExist(foldername);
+        //
+        enterFolder(foldername);
+        //
+        enterRelevantContacts(acceptor);
+        //
+        logoutFromWebmail();
     }
 
     /**
@@ -248,7 +386,6 @@ public class InjectIntoWebmailAddressBook {
      * given "ClubMember" is detected as being a "committee member"
      */
 
-    @Test
     public void addSubsetCommittee() {
         Acceptor acceptor = new Acceptor() {
             public boolean accept(ClubMember x) {
@@ -261,7 +398,7 @@ public class InjectIntoWebmailAddressBook {
                 return "Comité ACL";
             }
         };
-        createAddressbook("*** Subset: Comité ***", acceptor);
+        createAddressbook("### Subset: Comité ###", acceptor);
     }
 
     /**
@@ -269,7 +406,6 @@ public class InjectIntoWebmailAddressBook {
      * given "ClubMember" is detected as being a "black belter"
      */
 
-    @Test
     public void addSubsetCeinturesNoires() {
         Acceptor acceptor = new Acceptor() {
             public boolean accept(ClubMember x) {
@@ -278,11 +414,11 @@ public class InjectIntoWebmailAddressBook {
             }
 
             public String getCompany(ClubMember x) {
-                assert x != null;               
+                assert x != null;
                 return "Ceinture Noire: " + ((x.level == null) ? "?" : x.level);
             }
         };
-        createAddressbook("*** Subset: Ceintures Noires ***", acceptor);
+        createAddressbook("### Subset: Ceintures Noires ###", acceptor);
     }
 
     /**
@@ -290,7 +426,6 @@ public class InjectIntoWebmailAddressBook {
      * given "ClubMember" is detected as being a "child"
      */
 
-    @Test
     public void addSubsetEnfants() {
         Acceptor acceptor = new Acceptor() {
             public boolean accept(ClubMember x) {
@@ -303,7 +438,7 @@ public class InjectIntoWebmailAddressBook {
                 return "Enfant âgé de: " + x.getAge() + " ans";
             }
         };
-        createAddressbook("*** Subset: Enfants ***", acceptor);
+        createAddressbook("### Subset: Enfants ###", acceptor);
     }
 
     /**
@@ -311,7 +446,6 @@ public class InjectIntoWebmailAddressBook {
      * given "ClubMember" is detected as being an "adult"
      */
 
-    @Test
     public void addSubsetAdultes() {
         Acceptor acceptor = new Acceptor() {
             public boolean accept(ClubMember x) {
@@ -324,14 +458,13 @@ public class InjectIntoWebmailAddressBook {
                 return "Adulte âgé de: " + x.getAge() + " ans";
             }
         };
-        createAddressbook("*** Subset: Adultes ***", acceptor);
+        createAddressbook("### Subset: Adultes ###", acceptor);
     }
 
     /**
      * Proper action: Adding everybody
      */
 
-    @Test
     public void addSubsetTousLesMembres() {
         Acceptor acceptor = new Acceptor() {
             public boolean accept(ClubMember x) {
@@ -344,7 +477,75 @@ public class InjectIntoWebmailAddressBook {
                 return "Membre ACL";
             }
         };
-        createAddressbook("*** Tous les Membres du Club ***", acceptor);
+        createAddressbook("### Tous les Membres du Club ###", acceptor);
     }
 
+    /**
+     * Main
+     */
+
+    private enum Action {
+        addSubsetCommittee, addSubsetCeinturesNoires, addSubsetEnfants, addSubsetAdultes, addSubsetTousLesMembres
+    }
+
+    public static void main(String[] argv) {
+        Logger logger = LoggerFactory.getLogger(CLASS + ".main");
+        //
+        // Fire up logging through "SLF4J" over "Logback"
+        // This looks like a zero-effect statement but it's actually an initialization
+        //
+        {
+            Object foo = new LogbackStarter(InjectIntoWebmailAddressBook.class);
+        }
+        //
+        // The resource "config.xml" in the package in which "Hook" resides is read and a directly
+        // usable structure is returned.
+        //
+        PropertiesReader config = new PropertiesReader(name.gluino.webmailfeed.data.Hook.class, "config.xml");
+        //
+        // Hoover up all the member information and put it into a Set<Member>
+        //
+        Set<ClubMember> allMembers;
+        try {
+            allMembers = (new MemberListSlurper(config.getFqInputResource(), config.getCommitteEmails())).members;
+        } catch (Exception exe) {
+            throw new IllegalStateException(exe);
+        }
+        //
+        // Run interaction
+        //
+        for (Action ax : Action.values()) {
+
+            InjectIntoWebmailAddressBook inj = null;
+            try {
+                inj = new InjectIntoWebmailAddressBook(config, allMembers);
+                switch (ax) {
+                case addSubsetCommittee:
+                    // inj.addSubsetCommittee();
+                    break;
+                case addSubsetCeinturesNoires:
+                    // inj.addSubsetCeinturesNoires();
+                    break;
+                case addSubsetEnfants:
+                    inj.addSubsetEnfants();
+                    break;
+                case addSubsetAdultes:
+                    inj.addSubsetAdultes();
+                    break;
+                case addSubsetTousLesMembres:
+                    inj.addSubsetTousLesMembres();
+                    break;
+                default:
+                    // NOP
+                }
+            } catch (Exception exe) {
+                logger.error("While running", exe);
+                System.exit(1);
+            } finally {
+                if (inj != null) {
+                    inj.tearDown();
+                }
+            }
+        }
+    }
 }

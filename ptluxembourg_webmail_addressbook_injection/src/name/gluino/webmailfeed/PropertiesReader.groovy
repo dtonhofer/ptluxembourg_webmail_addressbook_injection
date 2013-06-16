@@ -63,7 +63,7 @@ class PropertiesReader {
         password = config.credentials.password.text()
         userEmail = config.credentials.email.text()
         baseURL = config.base_url.text()
-        def emails = config.emails_of_comittee_members.email
+        def emails = config.emails_of_committee_members.email
         Set<String> mutableSet = new HashSet();
         emails.each {
             String email = it.text().trim()
