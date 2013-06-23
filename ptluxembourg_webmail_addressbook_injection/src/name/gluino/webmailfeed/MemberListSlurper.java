@@ -17,9 +17,9 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mplify.checkers._check;
-import com.mplify.msgserver.addressing.AddressAcceptor;
+import com.mplify.checkers.Check;
 import com.mplify.resources.ResourceHelpers;
+import com.mplify.tools.AddressAcceptor;
 
 /* 34567890123456789012345678901234567890123456789012345678901234567890123456789
  * *****************************************************************************
@@ -46,7 +46,7 @@ class MemberListSlurper {
         // Codes for the KYU and DAN levels in the input
         //
         {
-            Map<String, Level> map = new HashMap();
+            Map<String, Level> map = new HashMap<String, Level>();
             map.put("6k", Level.KYU_6);
             map.put("5k", Level.KYU_5);
             map.put("4k", Level.KYU_4);
@@ -84,8 +84,8 @@ class MemberListSlurper {
 
     private static Set<ClubMember> readMembers(String fqInputResource, Set<String> committeeEmails) throws IOException {
         Logger logger = LOGGER_readMembers;
-        _check.notNull(committeeEmails);
-        Set<ClubMember> res = new HashSet();
+        Check.notNull(committeeEmails);
+        Set<ClubMember> res = new HashSet<ClubMember>();
         String data = ResourceHelpers.slurpResource(fqInputResource, "UTF-8");
         LineNumberReader lnr = new LineNumberReader(new StringReader(data));
         String current;
@@ -112,7 +112,7 @@ class MemberListSlurper {
                     continue;
                 }                
                 boolean nope = false;
-                List<String> emailAddressList = new LinkedList();
+                List<String> emailAddressList = new LinkedList<String>();
                 {
                     String[] emailAddressArray = emailAddressOverall.split("\\s+");
                     for (String candidate : emailAddressArray) {
@@ -192,6 +192,7 @@ class MemberListSlurper {
      * Helper
      */
 
+    @SuppressWarnings("unused")
     private static Level makeLevel(Matcher m, int groupNum) {
         Logger logger = LOGGER_makeLevel;
         String levelStr = m.group(groupNum).toLowerCase().replaceAll("\\s", "");

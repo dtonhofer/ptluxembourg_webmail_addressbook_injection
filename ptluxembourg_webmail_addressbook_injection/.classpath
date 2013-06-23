@@ -10,9 +10,6 @@
 	<classpathentry kind="lib" path="/xtern_third_party_jars/logback/logback-core.jar"/>
 	<classpathentry kind="lib" path="/xtern_third_party_jars/slf4j/slf4j-api.jar"/>
 	<classpathentry kind="lib" path="/xtern_third_party_jars/selenium/selenium-java.jar"/>
-	<classpathentry kind="src" path="/01_ignition"/>
-	<classpathentry kind="src" path="/02_logging_annex"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/04_core_low"/>
 	<classpathentry kind="lib" path="/xtern_third_party_jars/selenium/annex/apache-mime4j-0.6.jar"/>
 	<classpathentry kind="lib" path="/xtern_third_party_jars/selenium/annex/bsh-1.3.0.jar"/>
 	<classpathentry kind="lib" path="/xtern_third_party_jars/selenium/annex/cglib-nodep-2.1_3.jar"/>
@@ -50,6 +47,6 @@
 	<classpathentry kind="lib" path="/xtern_third_party_jars/selenium/annex/xalan-2.7.1.jar"/>
 	<classpathentry kind="lib" path="/xtern_third_party_jars/selenium/annex/xercesImpl-2.10.0.jar"/>
 	<classpathentry kind="lib" path="/xtern_third_party_jars/selenium/annex/xml-apis-1.4.01.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/ptluxembourg_webmail_critical_data"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/01_utils"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

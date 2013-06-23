@@ -8,8 +8,8 @@ import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import com.mplify.checkers._check;
-import com.mplify.msgserver.addressing.AddressAcceptor;
+import com.mplify.checkers.Check;
+import com.mplify.tools.AddressAcceptor;
 
 /* 34567890123456789012345678901234567890123456789012345678901234567890123456789
  * *****************************************************************************
@@ -33,14 +33,14 @@ class ClubMember {
     public final boolean isComite;
 
     public ClubMember(String firstName, String lastName, List<String> emailAddressList, DateTime birthday, Level level, boolean isComite) {
-        _check.notNull(firstName, "first name");
-        _check.notNull(lastName, "last name");
-        _check.notNull(emailAddressList, "email address list");
-        _check.isFalse(emailAddressList.isEmpty(), "email address list is empty");
-        // _check.notNull(birthday, "birthday");
-        // _check.notNull(level, "level");
+        Check.notNull(firstName, "first name");
+        Check.notNull(lastName, "last name");
+        Check.notNull(emailAddressList, "email address list");
+        Check.isFalse(emailAddressList.isEmpty(), "email address list is empty");
+        // Check.notNull(birthday, "birthday");
+        // Check.notNull(level, "level");
         for (String e : emailAddressList) {
-            _check.isTrue(AddressAcceptor.acceptAddress(e), "The address '%s' was unacceptable", e);
+            Check.isTrue(AddressAcceptor.acceptAddress(e), "The address '%s' was unacceptable", e);
         }
         this.firstName = firstName;
         this.lastName = lastName;

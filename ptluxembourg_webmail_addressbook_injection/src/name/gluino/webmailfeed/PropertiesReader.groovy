@@ -5,10 +5,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.prefs.XmlSupport;
 
-import com.mplify.checkers._check;
-import com.mplify.msgserver.addressing.AddressAcceptor;
+import com.mplify.checkers.Check;
 import com.mplify.resources.ResourceHelpers;
-import com.mplify.xml.JDomHelper;
+import com.mplify.tools.AddressAcceptor;
 
 /* 34567890123456789012345678901234567890123456789012345678901234567890123456789
  * *****************************************************************************
@@ -67,17 +66,17 @@ class PropertiesReader {
         Set<String> mutableSet = new HashSet();
         emails.each {
             String email = it.text().trim()
-            _check.isTrue(AddressAcceptor.acceptAddress(email),"Email address '%s' is not acceptable",email)
+            Check.isTrue(AddressAcceptor.acceptAddress(email),"Email address '%s' is not acceptable",email)
             boolean added = mutableSet.add(email)
-            _check.isTrue(added, "Email address '%s' seen twice",email)
+            Check.isTrue(added, "Email address '%s' seen twice",email)
         }
         committeEmails = Collections.unmodifiableSet(mutableSet)
         fqInputResource = ResourceHelpers.fullyQualifyResourceName(hookClass, config.input_resource.text())
-        _check.notNullAndNotOnlyWhitespace(username,"username is unset")
-        _check.notNullAndNotOnlyWhitespace(password,"password is unset")
-        _check.notNullAndNotOnlyWhitespace(userEmail,"user email is unset")
-        _check.notNullAndNotOnlyWhitespace(baseURL,"baseURL is unset")
-        _check.isFalse(committeEmails.isEmpty(),"No committee emails found at all")
-        _check.notNullAndNotOnlyWhitespace(fqInputResource,"fqInputResource is unset")
+        Check.notNullAndNotOnlyWhitespace(username,"username is unset")
+        Check.notNullAndNotOnlyWhitespace(password,"password is unset")
+        Check.notNullAndNotOnlyWhitespace(userEmail,"user email is unset")
+        Check.notNullAndNotOnlyWhitespace(baseURL,"baseURL is unset")
+        Check.isFalse(committeEmails.isEmpty(),"No committee emails found at all")
+        Check.notNullAndNotOnlyWhitespace(fqInputResource,"fqInputResource is unset")
     }
 }
