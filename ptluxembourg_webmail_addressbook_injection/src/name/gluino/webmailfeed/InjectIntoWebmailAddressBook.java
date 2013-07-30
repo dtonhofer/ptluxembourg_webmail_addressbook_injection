@@ -339,7 +339,6 @@ public class InjectIntoWebmailAddressBook {
      * Helper
      */
 
-    @SuppressWarnings("unused")
     private void createAddressbook(String foldername, Acceptor acceptor) {
         Logger logger = LOGGER_createAddressbook;
         //
@@ -368,7 +367,6 @@ public class InjectIntoWebmailAddressBook {
      * Helper
      */
 
-    @SuppressWarnings("unused")
     private String closeAlertAndGetItsText() {
         try {
             Alert alert = driver.switchTo().alert();

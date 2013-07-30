@@ -46,7 +46,7 @@ class MemberListSlurper {
         // Codes for the KYU and DAN levels in the input
         //
         {
-            Map<String, Level> map = new HashMap<String, Level>();
+            Map<String, Level> map = new HashMap();
             map.put("6k", Level.KYU_6);
             map.put("5k", Level.KYU_5);
             map.put("4k", Level.KYU_4);
@@ -85,7 +85,7 @@ class MemberListSlurper {
     private static Set<ClubMember> readMembers(String fqInputResource, Set<String> committeeEmails) throws IOException {
         Logger logger = LOGGER_readMembers;
         Check.notNull(committeeEmails);
-        Set<ClubMember> res = new HashSet<ClubMember>();
+        Set<ClubMember> res = new HashSet();
         String data = ResourceHelpers.slurpResource(fqInputResource, "UTF-8");
         LineNumberReader lnr = new LineNumberReader(new StringReader(data));
         String current;
@@ -112,7 +112,7 @@ class MemberListSlurper {
                     continue;
                 }                
                 boolean nope = false;
-                List<String> emailAddressList = new LinkedList<String>();
+                List<String> emailAddressList = new LinkedList();
                 {
                     String[] emailAddressArray = emailAddressOverall.split("\\s+");
                     for (String candidate : emailAddressArray) {
@@ -192,7 +192,6 @@ class MemberListSlurper {
      * Helper
      */
 
-    @SuppressWarnings("unused")
     private static Level makeLevel(Matcher m, int groupNum) {
         Logger logger = LOGGER_makeLevel;
         String levelStr = m.group(groupNum).toLowerCase().replaceAll("\\s", "");
