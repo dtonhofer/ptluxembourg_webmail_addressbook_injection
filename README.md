@@ -7,7 +7,7 @@ interface using Selenium WebDriver.
 This code fulfills two needs:
 
    * Getting acquainted with Selenium WebDriver.
-     (see in particular (http://aosabook.org/en/selenium.html)[Selenium WebDriver by Simon Stewart] for an introduction)
+     (see in particular [Selenium WebDriver by Simon Stewart](http://aosabook.org/en/selenium.html) for an introduction)
    * Getting our Sports Club address list, currently in an Excel sheet, into the P&T Webmail (at one time
      I will have to write a Grails app, fer sure).
 
@@ -17,13 +17,10 @@ one looks of course) and random delays in page rebuilds and Ajax refreshes may h
 consequence, this code is brittle: it works in the current instantiation but only with certain probability
 and only if one adds judicious calls to `sleep()`
 
-The code is Groovy instead of Java, because let's face it - why hurt oneself by doing something as 
-dynamic as driving a website by something as strict as Java?
-
 Found to be of extreme use in this endeavor:
 
    * The Firefox Web Developer tools
-   * The Firefox (https://addons.mozilla.org/de/firefox/addon/firebug/)[Firebug plugin].
+   * The Firefox [Firebug plugin](https://addons.mozilla.org/de/firefox/addon/firebug/).
    
 
 
