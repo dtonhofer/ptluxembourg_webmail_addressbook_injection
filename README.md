@@ -21,8 +21,8 @@ Found to be of extreme use in this endeavor:
 
    * The Firefox Web Developer tools
    * The Firefox [Firebug plugin](https://addons.mozilla.org/de/firefox/addon/firebug/).
-   
 
+![The Webmail interface that we want to control](images/WebmailSnapshot.png "The Webmail interface that we want to control")
 
 
 
