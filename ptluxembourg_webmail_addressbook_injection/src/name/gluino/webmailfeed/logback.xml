@@ -22,6 +22,6 @@
 
 	<!-- logger configuration -->
 
-	<logger level="WARN" name="com.mplify.dbconn.PoolFrontend" />
+	<logger level="WARN" name="name.gluino.webmailfeed.MemberListSlurper.makeLevel" />
 
 </configuration>

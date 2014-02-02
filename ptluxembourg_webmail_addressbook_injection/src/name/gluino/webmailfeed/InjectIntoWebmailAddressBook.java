@@ -237,7 +237,7 @@ public class InjectIntoWebmailAddressBook {
     private void makeSureFolderDoesNotExist(String foldername) {
         Logger logger = LOGGER_makeSureFolderDoesNotExist;
         logger.info("Making sure there is no folder '" + foldername + "'");
-        // for some reason this tkes a LONG time
+        // for some reason this takes a LONG time
         checkFalse(isElementPresent(By.xpath("//a[contains(text(),'" + foldername + "')]")), "Was looking for '" + foldername + "'");
         logger.info("Apparently there is no folder '" + foldername + "'");
     }
@@ -510,10 +510,7 @@ public class InjectIntoWebmailAddressBook {
         // Fire up logging through "SLF4J" over "Logback"
         // This looks like a zero-effect statement but it's actually an initialization
         //
-        {
-            @SuppressWarnings("unused")
-            Object foo = new LogbackStarter(InjectIntoWebmailAddressBook.class);
-        }
+        new LogbackStarter(InjectIntoWebmailAddressBook.class);
         //
         // The resource "config.xml" in the package in which "Hook" resides is read and a directly
         // usable structure is returned.

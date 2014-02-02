@@ -1,11 +1,10 @@
 package name.gluino.webmailfeed
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.prefs.XmlSupport;
+import static com.example.BasicChecks.*
 
-import static com.example.BasicChecks.*;
+import com.example.resources.ResourceHelp
+import com.example.resources.ResourceInfo
+import com.mplify.tools.MailAddressAcceptor
 
 /* 34567890123456789012345678901234567890123456789012345678901234567890123456789
  * *****************************************************************************
@@ -54,7 +53,7 @@ class PropertiesReader {
      */
 
     PropertiesReader(Class hookClass, String unqualifiedResourceName) {
-        String xmltxt = ResourceHelpers.slurpResource(hookClass, unqualifiedResourceName, "UTF-8")
+        String xmltxt = ResourceHelp.slurpText(new ResourceInfo(hookClass, unqualifiedResourceName, "UTF-8"))
         def config = new XmlSlurper().parseText(xmltxt)
         username = config.credentials.username.text()
         password = config.credentials.password.text()
@@ -64,12 +63,12 @@ class PropertiesReader {
         Set<String> mutableSet = new HashSet();
         emails.each {
             String email = it.text().trim()
-            checkTrue(AddressAcceptor.acceptAddress(email),"Email address '%s' is not acceptable",email)
+            checkTrue(MailAddressAcceptor.acceptAddress(email),"Email address '{}' is not acceptable",email)
             boolean added = mutableSet.add(email)
             checkTrue(added, "Email address '%s' seen twice",email)
         }
         committeEmails = Collections.unmodifiableSet(mutableSet)
-        fqInputResource = ResourceHelpers.fullyQualifyResourceName(hookClass, config.input_resource.text())
+        fqInputResource = ResourceHelp.fullyQualifyResourceName(hookClass, config.input_resource.text())
         checkNotNullAndNotOnlyWhitespace(username,"username is unset")
         checkNotNullAndNotOnlyWhitespace(password,"password is unset")
         checkNotNullAndNotOnlyWhitespace(userEmail,"user email is unset")
