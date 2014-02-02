@@ -17,9 +17,10 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mplify.checkers.Check;
+import static com.example.BasicChecks.*;
+
 import com.mplify.resources.ResourceHelpers;
-import com.mplify.tools.AddressAcceptor;
+import com.mplify.tools.MailAddressAcceptor;
 
 /* 34567890123456789012345678901234567890123456789012345678901234567890123456789
  * *****************************************************************************
@@ -37,6 +38,7 @@ class MemberListSlurper {
 
     private final static String CLASS = MemberListSlurper.class.getName();
     private final static Logger LOGGER_readMembers = LoggerFactory.getLogger(CLASS + ".readMembers");
+    @SuppressWarnings("unused")
     private final static Logger LOGGER_makeLevel = LoggerFactory.getLogger(CLASS + ".makeLevel");
 
     private final static Map<String, Level> LEVEL_MAPPING;
@@ -84,7 +86,7 @@ class MemberListSlurper {
 
     private static Set<ClubMember> readMembers(String fqInputResource, Set<String> committeeEmails) throws IOException {
         Logger logger = LOGGER_readMembers;
-        Check.notNull(committeeEmails);
+        checkNotNull(committeeEmails);
         Set<ClubMember> res = new HashSet();
         String data = ResourceHelpers.slurpResource(fqInputResource, "UTF-8");
         LineNumberReader lnr = new LineNumberReader(new StringReader(data));
@@ -120,7 +122,7 @@ class MemberListSlurper {
                         if (cx.isEmpty()) {
                             continue;
                         } else {
-                            if (!AddressAcceptor.acceptAddress(cx)) {
+                            if (!MailAddressAcceptor.acceptAddress(cx)) {
                                 logger.error("Could not understand email '" + cx + "' in line '" + current + "'");
                                 nope = true;
                             } else {
@@ -193,7 +195,7 @@ class MemberListSlurper {
      */
 
     private static Level makeLevel(Matcher m, int groupNum) {
-        Logger logger = LOGGER_makeLevel;
+        // Logger logger = LOGGER_makeLevel;
         String levelStr = m.group(groupNum).toLowerCase().replaceAll("\\s", "");
         // logger.info("Transformed level string is '" + levelStr + "'");
         return LEVEL_MAPPING.get(levelStr);

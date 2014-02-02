@@ -5,9 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.prefs.XmlSupport;
 
-import com.mplify.checkers.Check;
-import com.mplify.resources.ResourceHelpers;
-import com.mplify.tools.AddressAcceptor;
+import static com.example.BasicChecks.*;
 
 /* 34567890123456789012345678901234567890123456789012345678901234567890123456789
  * *****************************************************************************
@@ -66,17 +64,17 @@ class PropertiesReader {
         Set<String> mutableSet = new HashSet();
         emails.each {
             String email = it.text().trim()
-            Check.isTrue(AddressAcceptor.acceptAddress(email),"Email address '%s' is not acceptable",email)
+            checkTrue(AddressAcceptor.acceptAddress(email),"Email address '%s' is not acceptable",email)
             boolean added = mutableSet.add(email)
-            Check.isTrue(added, "Email address '%s' seen twice",email)
+            checkTrue(added, "Email address '%s' seen twice",email)
         }
         committeEmails = Collections.unmodifiableSet(mutableSet)
         fqInputResource = ResourceHelpers.fullyQualifyResourceName(hookClass, config.input_resource.text())
-        Check.notNullAndNotOnlyWhitespace(username,"username is unset")
-        Check.notNullAndNotOnlyWhitespace(password,"password is unset")
-        Check.notNullAndNotOnlyWhitespace(userEmail,"user email is unset")
-        Check.notNullAndNotOnlyWhitespace(baseURL,"baseURL is unset")
-        Check.isFalse(committeEmails.isEmpty(),"No committee emails found at all")
-        Check.notNullAndNotOnlyWhitespace(fqInputResource,"fqInputResource is unset")
+        checkNotNullAndNotOnlyWhitespace(username,"username is unset")
+        checkNotNullAndNotOnlyWhitespace(password,"password is unset")
+        checkNotNullAndNotOnlyWhitespace(userEmail,"user email is unset")
+        checkNotNullAndNotOnlyWhitespace(baseURL,"baseURL is unset")
+        checkFalse(committeEmails.isEmpty(),"No committee emails found at all")
+        checkNotNullAndNotOnlyWhitespace(fqInputResource,"fqInputResource is unset")
     }
 }

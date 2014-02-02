@@ -2,6 +2,8 @@ package name.gluino.webmailfeed;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.Alert;
@@ -13,7 +15,8 @@ import org.openqa.selenium.support.ui.Select;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mplify.checkers.Check;
+import static com.example.BasicChecks.*;
+
 import com.mplify.logging.LogFacilities;
 import com.mplify.logstarter.LogbackStarter;
 import com.mplify.tools.Sleep;
@@ -56,8 +59,8 @@ public class InjectIntoWebmailAddressBook {
     private final Set<ClubMember> allMembers; // immutable set of all the club members
     private final WebDriver driver;
 
-    private final int DOG_SLOW_SECONDS = 60;
-    private final int MEDIUM_SLOW_SECONDS = 30;
+    private final int DOG_SLOW_SECONDS = 10;
+    private final int MEDIUM_SLOW_SECONDS = 10;
 
     /**
      * We also have a simple facility to store several problems in a string buffer
@@ -71,8 +74,8 @@ public class InjectIntoWebmailAddressBook {
      */
 
     public InjectIntoWebmailAddressBook(PropertiesReader config, Set<ClubMember> allMembers) {
-        Check.notNull(config, "config");
-        Check.notNull(allMembers, "allMembers");
+        checkNotNull(config, "config");
+        checkNotNull(allMembers, "allMembers");
         this.config = config;
         this.allMembers = Collections.unmodifiableSet(allMembers);
         this.driver = new FirefoxDriver();
@@ -87,7 +90,7 @@ public class InjectIntoWebmailAddressBook {
         driver.quit();
         String verificationErrorString = verificationErrors.toString();
         if (!"".equals(verificationErrorString)) {
-            Check.fail(verificationErrorString);
+            instaFail(verificationErrorString);
         }
     }
 
@@ -105,8 +108,8 @@ public class InjectIntoWebmailAddressBook {
         //
         String text = driver.findElement(By.cssSelector("BODY")).getText();
         logger.info("Text in BODY: '" + LogFacilities.mangleString(text) + "'");
-        Check.isTrue(text.contains("Webmail Login"), "Did not find 'Webmail Login'");
-        Check.isTrue(text.contains("Entreprise des P&T"), "Did not find 'Entreprise des P&T'");
+        checkTrue(text.contains("Webmail Login"), "Did not find 'Webmail Login'");
+        checkTrue(text.contains("POST Luxembourg"), "Did not find 'POST Luxembourg'");
         logger.info("Apparently the login page is visible");
     }
 
@@ -130,15 +133,15 @@ public class InjectIntoWebmailAddressBook {
         driver.get(config.getBaseURL() + "/webmail/overview");
         String title = driver.getTitle();
         logger.info("Title of page: '" + LogFacilities.mangleString(title) + "'");
-        Check.isTrue(title.matches(".*?P&T\u00A0Luxembourg\u00A0Webmail.*?"), "Looked for P&T Luxembourg Webmail string");
+        // checkTrue(title.matches(".*?P&T\u00A0Luxembourg\u00A0Webmail.*?"), "Looked for P&T Luxembourg Webmail string");
         String text = driver.findElement(By.cssSelector("BODY")).getText();
         logger.info("Text in BODY: '" + LogFacilities.mangleString(text) + "'");
-        Check.isTrue(text.contains(config.getUsername()), "Looked for '" + config.getUsername() + "'");
-        Check.isTrue(text.contains("Logout"), "Looked for 'Logout'");
+        checkTrue(text.contains(config.getUsername()), "Looked for '" + config.getUsername() + "'");
+        checkTrue(text.contains("Logout"), "Looked for 'Logout'");
         //
         // The icon for "contacts" should be there
         //
-        Check.isTrue(isElementPresent(By.cssSelector("span.icon_manager.navigation_addr")), "The 'Contacts' icon is there");
+        checkTrue(isElementPresent(By.cssSelector("span.icon_manager.navigation_addr")), "The 'Contacts' icon is there");
         logger.info("Apparently we are logged in");
     }
 
@@ -158,7 +161,7 @@ public class InjectIntoWebmailAddressBook {
 
     private void waitForExportImportInAddressBookMenu() {
       for (int second = 0;; second++) {
-          Check.isFalse(second >= 60, "timeout");
+          checkFalse(second >= 60, "timeout");
           try { if (isElementPresent(By.id("text_action_export"))) break; } catch (Exception e) { 
               // NOP          
               
@@ -167,7 +170,7 @@ public class InjectIntoWebmailAddressBook {
       }
 
       for (int second = 0;; second++) {
-          Check.isFalse(second >= 60, "timeout");
+          checkFalse(second >= 60, "timeout");
           try { if (isElementPresent(By.id("text_action_import_addrimport"))) break; } catch (Exception e) {
               // NOP
           }
@@ -189,9 +192,9 @@ public class InjectIntoWebmailAddressBook {
         // On return, the web page should be in "address book mode".
         // Finding out that this is so is kind difficult.
         //
-        Check.isTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Contacts[\\s\\S]*$"), "Looked for 'Contacts'");
+        checkTrue(driver.findElement(By.cssSelector("BODY")).getText().matches("^[\\s\\S]*Contacts[\\s\\S]*$"), "Looked for 'Contacts'");
         waitForExportImportInAddressBookMenu();
-        Check.isTrue(isElementPresent(By.id("icon_action_add_folder")), "Add folder icon should be there");        
+        checkTrue(isElementPresent(By.id("icon_action_add_folder")), "Add folder icon should be there");        
         //
         // Click at least twice then click once more if "Contacts" is not yet there
         //
@@ -206,7 +209,7 @@ public class InjectIntoWebmailAddressBook {
         //
         // Contacts must now be there
         //
-        Check.isTrue(isElementPresent(By.xpath("//a[contains(text(),'Contacts')]")), "Was looking for 'Contacts'");
+        checkTrue(isElementPresent(By.xpath("//a[contains(text(),'Contacts')]")), "Was looking for 'Contacts'");
         logger.info("Apparently 'Contacts' are now visible");
 
     }
@@ -222,8 +225,8 @@ public class InjectIntoWebmailAddressBook {
         Sleep.sleepTwoSeconds();
         String text = driver.findElement(By.cssSelector("BODY")).getText();
         logger.info("Text in BODY: '" + LogFacilities.mangleString(text) + "'");
-        Check.isTrue(text.contains("Webmail Login"), "Did not find 'Webmail Login'");
-        Check.isTrue(text.contains("Entreprise des P&T"), "Did not find 'Entreprise des P&T'");
+        checkTrue(text.contains("Webmail Login"), "Did not find 'Webmail Login'");
+        //checkTrue(text.contains("Entreprise des P&T"), "Did not find 'Entreprise des P&T'");
         logger.info("Apparently logged out");
     }
 
@@ -235,7 +238,7 @@ public class InjectIntoWebmailAddressBook {
         Logger logger = LOGGER_makeSureFolderDoesNotExist;
         logger.info("Making sure there is no folder '" + foldername + "'");
         // for some reason this tkes a LONG time
-        Check.isFalse(isElementPresent(By.xpath("//a[contains(text(),'" + foldername + "')]")), "Was looking for '" + foldername + "'");
+        checkFalse(isElementPresent(By.xpath("//a[contains(text(),'" + foldername + "')]")), "Was looking for '" + foldername + "'");
         logger.info("Apparently there is no folder '" + foldername + "'");
     }
 
@@ -246,7 +249,7 @@ public class InjectIntoWebmailAddressBook {
     private void makeSureFolderDoesExist(String foldername) {
         Logger logger = LOGGER_makeSureFolderDoesExist;
         logger.info("Making sure there is a folder '" + foldername + "'");
-        Check.isTrue(isElementPresent(By.xpath("//a[contains(text(),'" + foldername + "')]")), "Was looking for '" + foldername + "'");
+        checkTrue(isElementPresent(By.xpath("//a[contains(text(),'" + foldername + "')]")), "Was looking for '" + foldername + "'");
         logger.info("Apparently there is a folder '" + foldername + "'");
     }
 
@@ -258,10 +261,10 @@ public class InjectIntoWebmailAddressBook {
         Logger logger = LOGGER_addNewFolder;
         driver.findElement(By.id("icon_action_add_folder")).click();
         Sleep.sleepTwoSeconds();
-        Check.isTrue(isElementPresent(By.id("_button_cancel")), "Looked for CANCEL button");
-        Check.isTrue(isElementPresent(By.id("_button_save")), "Looked for SAVE button");
-        Check.isTrue(isElementPresent(By.id("parent")), "Looked for 'parent folder' entry field");
-        Check.isTrue(isElementPresent(By.id("name")), "Looked for 'name' entry field");
+        checkTrue(isElementPresent(By.id("_button_cancel")), "Looked for CANCEL button");
+        checkTrue(isElementPresent(By.id("_button_save")), "Looked for SAVE button");
+        checkTrue(isElementPresent(By.id("parent")), "Looked for 'parent folder' entry field");
+        checkTrue(isElementPresent(By.id("name")), "Looked for 'name' entry field");
         driver.findElement(By.id("name")).clear();
         driver.findElement(By.id("name")).sendKeys(foldername);
         driver.findElement(By.id("_button_save")).click();
@@ -295,9 +298,9 @@ public class InjectIntoWebmailAddressBook {
         driver.findElement(By.xpath("//a[contains(text(),'" + foldername + "')]")).click();
         Sleep.sleepTwoSeconds();
         
-        Check.isTrue(isElementPresent(By.id("icon_action_add")), "Looked for 'icon_action_add' action");
-        Check.isTrue(driver.findElement(By.cssSelector("BODY")).getText().contains(foldername), "Looked for '" + foldername + "'");
-        Check.isTrue(driver.findElement(By.cssSelector("BODY")).getText().contains("No items"), "Looked for 'No items'");
+        checkTrue(isElementPresent(By.id("icon_action_add")), "Looked for 'icon_action_add' action");
+        checkTrue(driver.findElement(By.cssSelector("BODY")).getText().contains(foldername), "Looked for '" + foldername + "'");
+        checkTrue(driver.findElement(By.cssSelector("BODY")).getText().contains("No items"), "Looked for 'No items'");
         logger.info("Apparently we are ready to enter contacts");
     }
 
@@ -340,6 +343,7 @@ public class InjectIntoWebmailAddressBook {
      */
 
     private void createAddressbook(String foldername, Acceptor acceptor) {
+        @SuppressWarnings("unused")
         Logger logger = LOGGER_createAddressbook;
         //
         goToWebmailLoginPage();
@@ -367,6 +371,7 @@ public class InjectIntoWebmailAddressBook {
      * Helper
      */
 
+    @SuppressWarnings("unused")
     private String closeAlertAndGetItsText() {
         try {
             Alert alert = driver.switchTo().alert();
@@ -488,6 +493,17 @@ public class InjectIntoWebmailAddressBook {
         addSubsetCommittee, addSubsetCeinturesNoires, addSubsetEnfants, addSubsetAdultes, addSubsetTousLesMembres
     }
 
+    private static SortedSet<Action> actionSet = new TreeSet<Action>();
+    
+    static {
+        actionSet.add(Action.addSubsetCommittee);
+        actionSet.add(Action.addSubsetCeinturesNoires);
+        actionSet.add(Action.addSubsetEnfants);
+        actionSet.add(Action.addSubsetAdultes);
+        actionSet.add(Action.addSubsetTousLesMembres);
+    }
+    
+    @SuppressWarnings("unchecked")
     public static void main(String[] argv) {
         Logger logger = LoggerFactory.getLogger(CLASS + ".main");
         //
@@ -495,6 +511,7 @@ public class InjectIntoWebmailAddressBook {
         // This looks like a zero-effect statement but it's actually an initialization
         //
         {
+            @SuppressWarnings("unused")
             Object foo = new LogbackStarter(InjectIntoWebmailAddressBook.class);
         }
         //
@@ -514,17 +531,17 @@ public class InjectIntoWebmailAddressBook {
         //
         // Run interaction
         //
-        for (Action ax : Action.values()) {
+        for (Action ax : actionSet) {
 
             InjectIntoWebmailAddressBook inj = null;
             try {
                 inj = new InjectIntoWebmailAddressBook(config, allMembers);
                 switch (ax) {
                 case addSubsetCommittee:
-                    // inj.addSubsetCommittee();
+                    inj.addSubsetCommittee();
                     break;
                 case addSubsetCeinturesNoires:
-                    // inj.addSubsetCeinturesNoires();
+                    inj.addSubsetCeinturesNoires();
                     break;
                 case addSubsetEnfants:
                     inj.addSubsetEnfants();

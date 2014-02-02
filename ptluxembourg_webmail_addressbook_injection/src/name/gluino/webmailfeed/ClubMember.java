@@ -1,5 +1,9 @@
 package name.gluino.webmailfeed;
 
+import static com.example.BasicChecks.checkFalse;
+import static com.example.BasicChecks.checkNotNull;
+import static com.example.BasicChecks.checkTrue;
+
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -8,8 +12,7 @@ import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import com.mplify.checkers.Check;
-import com.mplify.tools.AddressAcceptor;
+import com.mplify.tools.MailAddressAcceptor;
 
 /* 34567890123456789012345678901234567890123456789012345678901234567890123456789
  * *****************************************************************************
@@ -33,14 +36,14 @@ class ClubMember {
     public final boolean isComite;
 
     public ClubMember(String firstName, String lastName, List<String> emailAddressList, DateTime birthday, Level level, boolean isComite) {
-        Check.notNull(firstName, "first name");
-        Check.notNull(lastName, "last name");
-        Check.notNull(emailAddressList, "email address list");
-        Check.isFalse(emailAddressList.isEmpty(), "email address list is empty");
+        checkNotNull(firstName, "first name");
+        checkNotNull(lastName, "last name");
+        checkNotNull(emailAddressList, "email address list");
+        checkFalse(emailAddressList.isEmpty(), "email address list is empty");
         // Check.notNull(birthday, "birthday");
         // Check.notNull(level, "level");
         for (String e : emailAddressList) {
-            Check.isTrue(AddressAcceptor.acceptAddress(e), "The address '%s' was unacceptable", e);
+            checkTrue(MailAddressAcceptor.acceptAddress(e), "The address '%s' was unacceptable", e);
         }
         this.firstName = firstName;
         this.lastName = lastName;

@@ -47,7 +47,10 @@
 	<classpathentry kind="lib" path="/xtern_third_party_jars/selenium/annex/xalan-2.7.1.jar"/>
 	<classpathentry kind="lib" path="/xtern_third_party_jars/selenium/annex/xercesImpl-2.10.0.jar"/>
 	<classpathentry kind="lib" path="/xtern_third_party_jars/selenium/annex/xml-apis-1.4.01.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/01_utils"/>
 	<classpathentry kind="src" path="/ptluxembourg_webmail_critical_data"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/utils_checks"/>
+	<classpathentry kind="src" path="/utils_other"/>
+	<classpathentry kind="src" path="/utils_logging"/>
+	<classpathentry kind="src" path="/utils_resources"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
