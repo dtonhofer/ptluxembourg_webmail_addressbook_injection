@@ -29,5 +29,6 @@ Found to be of extremely valuable use in this endeavor:
 
 ![The Webmail interface that we want to control](images/WebmailSnapshot.png "The Webmail interface that we want to control")
 
+The look of that interface was somewhat updated end of 2013:
 
-
+![The Webmail interface that we want to control](images/WebmailSnapshot_2014.png "The Webmail interface that we want to control, late 2013")
