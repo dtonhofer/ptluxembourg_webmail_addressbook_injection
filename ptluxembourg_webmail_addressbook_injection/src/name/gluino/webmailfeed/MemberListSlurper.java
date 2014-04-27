@@ -74,8 +74,9 @@ class MemberListSlurper {
     public final Set<ClubMember> members;
 
     /**
-     * Constructor reads the passed resource; in order to flag a member of the club
-     * as "member of the committee", the list of committee e-mails is passed in too.
+     * Constructor reads the passed resource; in order to flag a member of the
+     * club as "member of the committee", the list of committee e-mails is
+     * passed in too.
      */
 
     public MemberListSlurper(String fqInputResource, Set<String> committeeEmails) throws IOException {
@@ -95,10 +96,11 @@ class MemberListSlurper {
         String current;
         String separator = ",";
         // FAMILYNAME , FirstName , EMAIL , Birthday as "DAY/MONTH/YEAR"
-        // email may be missing or there may be several e-mails, separated by space
+        // email may be missing or there may be several e-mails, separated by
+        // space
         // birth date may be missing
         // level indicator may be missing
-        Pattern pat = Pattern.compile("(.+?)" + separator + "(.+?)" + separator + "(.*?)" + separator + "\\s*((\\d\\d)\\/(\\d\\d)\\/(\\d\\d))?\\s*" + separator + "(.*)");
+        Pattern pat = Pattern.compile("(.+?)" + separator + "(.+?)" + separator + "(.*?)" + separator + "(.*?)" + separator + "(.*?)" + separator);
         while ((current = lnr.readLine()) != null) {
             Matcher m = pat.matcher(current);
             if (m.matches()) {
@@ -114,7 +116,7 @@ class MemberListSlurper {
                 if (emailAddressOverall.isEmpty()) {
                     logger.info("No e-mail address in line '" + current + "' -- skipping this");
                     continue;
-                }                
+                }
                 boolean nope = false;
                 List<String> emailAddressList = new LinkedList();
                 {
@@ -141,16 +143,29 @@ class MemberListSlurper {
                 // Birthday, if it exists
                 //
                 DateTime birthday = null;
-                if (m.group(4) != null) {                
-                    birthday = makeBirthday(m,4);
-                }             
+                {
+                    String rawBirthDay = makeNullIfEmpty(m.group(4));
+                    if (rawBirthDay != null) {                        
+                        birthday = makeBirthday(rawBirthDay);
+                        if (birthday == null) {
+                            logger.error("Could not understand birthday '" + rawBirthDay + "' in line '" + current + "'");
+                            System.exit(1);
+                        }
+                    }
+                }
                 //
                 // Level
                 //
-                Level level = makeLevel(m, 8);
-                if (level == null) {
-                    logger.error("Could not understand level in line '" + current + "'");
-                    // continue anyway!
+                Level level = null;
+                {
+                    String rawLevel = makeNullIfEmpty(m.group(5));
+                    if (rawLevel != null) {
+                        level = makeLevel(rawLevel);
+                        if (level == null) {
+                            logger.error("Could not understand level '" + rawLevel + "' in line '" + current + "'");
+                            System.exit(1);
+                        }
+                    }
                 }
                 //
                 // Member of the committee?
@@ -160,7 +175,8 @@ class MemberListSlurper {
                     isComite = isComite || (committeeEmails.contains(e));
                 }
                 //
-                // All the data has been collected; construct instance; this will check the values
+                // All the data has been collected; construct instance; this
+                // will check the values
                 //
                 ClubMember membre = new ClubMember(firstName, lastName, emailAddressList, birthday, level, isComite);
                 res.add(membre);
@@ -176,46 +192,73 @@ class MemberListSlurper {
      * Helper
      */
 
-    private static DateTime makeBirthday(Matcher m, int surroundGroup) {
-        String dayStr = m.group(surroundGroup+1);
-        String monthStr = m.group(surroundGroup+2);
-        String yearStr = m.group(surroundGroup+3);
-        int day = Integer.parseInt(dayStr);
-        int month = Integer.parseInt(monthStr);
-        int year = Integer.parseInt(yearStr);
-        // Y2K problem, again!
-        if (year > 30) {
-            year = year + 1900;
+    private static DateTime makeBirthday(String str) {
+        Pattern pat = Pattern.compile("(\\d\\d)(/|\\.)(\\d\\d)(/|\\.)(\\d\\d)");
+        Matcher m = pat.matcher(str);
+        if (m.matches()) {
+            String dayStr = m.group(1);
+            String monthStr = m.group(3);
+            String yearStr = m.group(5);
+            int day = Integer.parseInt(dayStr);
+            int month = Integer.parseInt(monthStr);
+            int year = Integer.parseInt(yearStr);
+            // Y2K problem, again!
+            if (year > 30) {
+                year = year + 1900;
+            } else {
+                year = year + 2000;
+            }
+            return new DateTime(year, month, day, 12, 0, 0, 0);
         } else {
-            year = year + 2000;
+            return null;
         }
-        return new DateTime(year, month, day, 12, 0, 0, 0);
     }
 
     /**
      * Helper
      */
 
-    private static Level makeLevel(Matcher m, int groupNum) {
+    private static Level makeLevel(String str) {
         Logger logger = LOGGER_makeLevel;
-        String levelStr = m.group(groupNum).toLowerCase().replaceAll("\\s", "");
+        String levelStr = str.toLowerCase().replaceAll("\\s", "");
         logger.info("Transformed level string is '" + levelStr + "'");
         return LEVEL_MAPPING.get(levelStr);
+    }
+
+    /**
+     * Helper
+     */
+    
+    private static String makeNullIfEmpty(String x) {
+        if (x == null) {
+            return x;
+        }
+        else {
+            x = x.trim();
+            if (x.isEmpty()) {
+                return null;
+            }
+            else {
+                return x;
+            }
+        }
     }
     
     /**
      * Test via short "main"
      */
-    
+
     @SuppressWarnings("unused")
     public static void main(String[] argv) {
         new LogbackStarter(InjectIntoWebmailAddressBook.class);
         try {
             Set<String> committeeEmails = new HashSet();
-            String fqResourceName = ResourceHelp_Java.fullyQualifyResourceName(Hook.class, "Membres actuels.csv");
+            String fqResourceName = ResourceHelp_Java.fullyQualifyResourceName(Hook.class, "Membres_actuels.csv");
             Set<ClubMember> allMembers = (new MemberListSlurper(fqResourceName, committeeEmails)).members;
         } catch (Exception exe) {
             throw new IllegalStateException(exe);
         }
     }
+    
+    
 }
