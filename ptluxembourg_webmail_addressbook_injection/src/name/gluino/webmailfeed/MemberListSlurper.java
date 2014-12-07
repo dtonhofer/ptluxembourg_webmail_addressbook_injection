@@ -95,12 +95,23 @@ class MemberListSlurper {
         LineNumberReader lnr = new LineNumberReader(new StringReader(data));
         String current;
         String separator = ",";
-        // FAMILYNAME , FirstName , EMAIL , Birthday as "DAY/MONTH/YEAR"
+        // FAMILYNAME , FirstName , EMAIL , Birthday as "DAY/MONTH/YEAR" , Level
         // email may be missing or there may be several e-mails, separated by
         // space
         // birth date may be missing
         // level indicator may be missing
-        Pattern pat = Pattern.compile("(.+?)" + separator + "(.+?)" + separator + "(.*?)" + separator + "(.*?)" + separator + "(.*?)" + separator);
+        String rawPattern = "";
+        rawPattern += "(.+?)"; // FAMILYNAME
+        rawPattern += separator;
+        rawPattern +=  "(.+?)"; // FirstName
+        rawPattern += separator;
+        rawPattern += "(.*?)"; // EMAIL
+        rawPattern += separator;
+        rawPattern += "(.*?)"; // Birthday
+        rawPattern += separator;
+        rawPattern += "(.*?)"; // Level
+        rawPattern += (separator + "?");        
+        Pattern pat = Pattern.compile(rawPattern);
         while ((current = lnr.readLine()) != null) {
             Matcher m = pat.matcher(current);
             if (m.matches()) {
