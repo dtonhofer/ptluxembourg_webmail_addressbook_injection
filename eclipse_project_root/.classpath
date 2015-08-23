@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ptluxembourg_webmail_critical_data"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="/home/hobbes/Development/3rd_party_libs/slf4j/slf4j-api.jar" sourcepath="/home/hobbes/Development/3rd_party_libs/slf4j/slf4j-api.src.jar"/>
+	<classpathentry kind="lib" path="/home/hobbes/Development/3rd_party_libs/slf4j/log4j-over-slf4j.jar"/>
+	<classpathentry kind="lib" path="/home/hobbes/Development/3rd_party_libs/slf4j/jul-to-slf4j.jar"/>
+	<classpathentry kind="lib" path="/home/hobbes/Development/3rd_party_libs/slf4j/jcl-over-slf4j.jar"/>
+	<classpathentry kind="lib" path="/home/hobbes/Development/3rd_party_libs/selenium-java/selenium-java.jar" sourcepath="/home/hobbes/Development/3rd_party_libs/selenium-java/selenium-java.src.jar"/>
+	<classpathentry kind="lib" path="/home/hobbes/Development/3rd_party_libs/joda-time/joda-time.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/utils_other"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="src" path="/ptluxembourg_webmail_critical_data"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/utils_checks"/>
-	<classpathentry kind="src" path="/utils_other"/>
-	<classpathentry kind="src" path="/utils_logging"/>
-	<classpathentry kind="src" path="/utils_resources"/>
-	<classpathentry kind="lib" path="/home/hobbes/Development/gitrepos/ptluxembourg_webmail_addressbook_injection/ptluxembourg_webmail_addressbook_injection/lib/slf4j-api.jar" sourcepath="lib/slf4j-api-sources.jar"/>
+	<classpathentry kind="lib" path="/home/hobbes/Development/3rd_party_libs/logback/logback-core.jar" sourcepath="/home/hobbes/Development/3rd_party_libs/logback/logback-core.src.jar"/>
+	<classpathentry kind="lib" path="/home/hobbes/Development/3rd_party_libs/logback/logback-classic.jar" sourcepath="/home/hobbes/Development/3rd_party_libs/logback/logback-classic.src.jar"/>
+	<classpathentry kind="lib" path="/home/hobbes/Development/3rd_party_libs/name.heavycarbon.checks/checks.jar" sourcepath="/home/hobbes/Development/3rd_party_libs/name.heavycarbon.checks/checks-src.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

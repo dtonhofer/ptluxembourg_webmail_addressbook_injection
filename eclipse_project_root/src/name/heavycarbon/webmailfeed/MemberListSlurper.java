@@ -17,20 +17,17 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.example.BasicChecks.*;
+import static name.heavycarbon.checks.BasicChecks.*;
 
-import com.example.resources.ResourceHelp_Java;
-import com.mplify.logstarter.LogbackStarter;
-import com.mplify.tools.MailAddressAcceptor;
+import name.heavycarbon.utils.ResourceHelp_Java;
+
+import name.heavycarbon.logstarter.LogbackStarter;
+import name.heavycarbon.utils.MailAddressAcceptor;
 
 import name.heavycarbon.webmailfeed.data.Hook;
 
 /* 34567890123456789012345678901234567890123456789012345678901234567890123456789
  * *****************************************************************************
- * Copyright (c) 2013, David Tonhofer
- *
- * Distributed under: "The MIT License" (http://opensource.org/licenses/MIT)
- *******************************************************************************
  * A class that read the CSV file which contains the memberlist
  * 
  * 2013.04.XX - Created
@@ -50,7 +47,8 @@ class MemberListSlurper {
         // Codes for the KYU and DAN levels in the input
         //
         {
-            Map<String, Level> map = new HashMap();
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+			Map<String, Level> map = new HashMap();
             map.put("6k", Level.KYU_6);
             map.put("5k", Level.KYU_5);
             map.put("4k", Level.KYU_4);
@@ -63,6 +61,7 @@ class MemberListSlurper {
             map.put("4d", Level.DAN_4);
             map.put("5d", Level.DAN_5);
             map.put("6d", Level.DAN_6);
+            map.put("7d", Level.DAN_7);
             LEVEL_MAPPING = Collections.unmodifiableMap(map);
         }
     }
@@ -87,7 +86,8 @@ class MemberListSlurper {
      * Do it
      */
 
-    private static Set<ClubMember> readMembers(String fqInputResource, Set<String> committeeEmails) throws IOException {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	private static Set<ClubMember> readMembers(String fqInputResource, Set<String> committeeEmails) throws IOException {
         Logger logger = LOGGER_readMembers;
         checkNotNull(committeeEmails);
         Set<ClubMember> res = new HashSet();
@@ -259,7 +259,7 @@ class MemberListSlurper {
      * Test via short "main"
      */
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({ "unused", "unchecked", "rawtypes" })
     public static void main(String[] argv) {
         new LogbackStarter(InjectIntoWebmailAddressBook.class);
         try {

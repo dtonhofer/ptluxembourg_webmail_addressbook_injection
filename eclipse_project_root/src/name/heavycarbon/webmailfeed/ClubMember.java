@@ -1,8 +1,6 @@
 package name.heavycarbon.webmailfeed;
 
-import static com.example.BasicChecks.checkFalse;
-import static com.example.BasicChecks.checkNotNull;
-import static com.example.BasicChecks.checkTrue;
+import static name.heavycarbon.checks.BasicChecks.*;
 
 import java.util.List;
 
@@ -11,15 +9,10 @@ import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-
-import com.mplify.tools.MailAddressAcceptor;
+import name.heavycarbon.utils.MailAddressAcceptor;
 
 /* 34567890123456789012345678901234567890123456789012345678901234567890123456789
  * *****************************************************************************
- * Copyright (c) 2013, David Tonhofer
- *
- * Distributed under: "The MIT License" (http://opensource.org/licenses/MIT)
- *******************************************************************************
  * Representation of a Club Member
  *  
  * 2013.04.XX - Created

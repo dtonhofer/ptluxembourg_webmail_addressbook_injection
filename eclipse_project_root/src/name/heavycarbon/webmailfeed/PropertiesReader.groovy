@@ -1,16 +1,12 @@
-package name.gluino.webmailfeed
+package name.heavycarbon.webmailfeed
 
-import static com.example.BasicChecks.*
+import static name.heavycarbon.checks.BasicChecks.*
 
-import com.example.resources.ResourceHelp
-import com.example.resources.ResourceInfo
-import com.mplify.tools.MailAddressAcceptor
+import name.heavycarbon.groovyutils.ResourceHelp
+import name.heavycarbon.utils.ResourceInfo
+import name.heavycarbon.utils.MailAddressAcceptor
 
 /* 34567890123456789012345678901234567890123456789012345678901234567890123456789
- * *****************************************************************************
- * Copyright (c) 2013, David Tonhofer
- *
- * Distributed under: "The MIT License" (http://opensource.org/licenses/MIT)
  *******************************************************************************
  * A class that read an XML resource and presents the data it found 
  *
@@ -55,10 +51,10 @@ class PropertiesReader {
     PropertiesReader(Class hookClass, String unqualifiedResourceName) {
         String xmltxt = ResourceHelp.slurpText(new ResourceInfo(hookClass, unqualifiedResourceName, "UTF-8"))
         def config = new XmlSlurper().parseText(xmltxt)
-        username = config.credentials.username.text()
-        password = config.credentials.password.text()
-        userEmail = config.credentials.email.text()
-        baseURL = config.base_url.text()
+        username = config.credentials.username.text().trim()
+        password = config.credentials.password.text().trim()
+        userEmail = config.credentials.email.text().trim()
+        baseURL = config.base_url.text().trim()
         def emails = config.emails_of_committee_members.email
         Set<String> mutableSet = new HashSet();
         emails.each {
