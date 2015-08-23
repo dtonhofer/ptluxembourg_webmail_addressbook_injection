@@ -1,4 +1,4 @@
-package name.gluino.webmailfeed;
+package name.heavycarbon.webmailfeed;
 
 /* 34567890123456789012345678901234567890123456789012345678901234567890123456789
  * *****************************************************************************
@@ -6,18 +6,19 @@ package name.gluino.webmailfeed;
  *
  * Distributed under: "The MIT License" (http://opensource.org/licenses/MIT)
  *******************************************************************************
- * Something which implements a boolean value on the set of Club Members,
- * Additionally, returns a string that can be written to the "Company field",
- * which we misuse for remarks & notices.
- *  
+ * Dan and Kyu levels. Each member of the club is given one of these.
+ * 
  * 2013.04.XX - Created
  * 2013.06.14 - Cleanup
  ******************************************************************************/
 
-interface Acceptor {
+enum Level {
 
-    public boolean accept(ClubMember x);
+    KYU_6(false), KYU_5(false), KYU_4(false), KYU_3(false), KYU_2(false), KYU_1(false), DAN_1(true), DAN_2(true), DAN_3(true), DAN_4(true), DAN_5(true), DAN_6(true);
 
-    public String getCompany(ClubMember x);
+    boolean isDan;
 
+    Level(boolean isDan) {
+        this.isDan = isDan;
+    }
 }

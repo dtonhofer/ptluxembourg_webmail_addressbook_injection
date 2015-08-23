@@ -1,4 +1,4 @@
-package name.gluino.webmailfeed;
+package name.heavycarbon.webmailfeed;
 
 import static com.example.BasicChecks.checkFalse;
 import static com.example.BasicChecks.checkNotNull;

@@ -1,4 +1,4 @@
-package name.gluino.webmailfeed;
+package name.heavycarbon.webmailfeed;
 
 import java.util.Collections;
 import java.util.Set;
