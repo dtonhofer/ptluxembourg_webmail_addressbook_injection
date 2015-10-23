@@ -51,6 +51,7 @@ import name.heavycarbon.webmailfeed.Actions.Action;
  * 
  * 2013.04.XX - Created
  * 2013.06.14 - Cleanup
+ * 2015.09.13 - Added "enfants & adolescents"
  ******************************************************************************/
 
 public class InjectIntoWebmailAddressBook {
@@ -72,7 +73,7 @@ public class InjectIntoWebmailAddressBook {
     private final static Logger LOGGER_verifyThatThisIsTheOverviewPage = LoggerFactory.getLogger(CLASS + ".verifyThatThisIsTheOverviewPage");
     private final static Logger LOGGER_openListOfContactFolders = LoggerFactory.getLogger(CLASS + ".openListOfContactFolders");
     private final static Logger LOGGER_sleepabit = LoggerFactory.getLogger(CLASS + ".sleepabit");
-    
+
     private final PropertiesReader config; // immutable configuration
     private final Set<ClubMember> allMembers; // immutable set of all the club
                                               // members
@@ -117,11 +118,12 @@ public class InjectIntoWebmailAddressBook {
 
     private static void sleepabit() {
         Logger logger = LOGGER_sleepabit;
-        final int time_ms = 500;
+        final int time_ms = 1000; // 500ms too fast and so is 1000ms from time
+                                  // to time
         logger.info("...waiting " + time_ms + " ms");
         Sleep.sleepFor(time_ms);
     }
-    
+
     private boolean isElementPresent(By by) {
         try {
             driver.findElement(by);
@@ -306,8 +308,8 @@ public class InjectIntoWebmailAddressBook {
         // this means we have to limit our search a bit
         List<String> poss = new LinkedList();
         poss.add(foldername);
-        int i = Math.min(foldername.length(), 32-"...".length());
-        poss.add(foldername.substring(0,i) + "...");
+        int i = Math.min(foldername.length(), 32 - "...".length());
+        poss.add(foldername.substring(0, i) + "...");
         String foundStr = null;
         for (String x : poss) {
             logger.info("Checking '" + x + "'");
@@ -337,8 +339,10 @@ public class InjectIntoWebmailAddressBook {
         sleepabit();
         checkTrue(isElementPresent(By.id("icon_action_add")), "Looked for 'icon_action_add' action");
         checkTrue(driver.findElement(By.cssSelector("BODY")).getText().contains(foldername), "Looked for '" + foldername + "'");
-        // This no longer works. If there are no items, a blank page is displayed!
-        // checkTrue(driver.findElement(By.cssSelector("BODY")).getText().contains("No items"), "Looked for 'No items'");
+        // This no longer works. If there are no items, a blank page is
+        // displayed!
+        // checkTrue(driver.findElement(By.cssSelector("BODY")).getText().contains("No
+        // items"), "Looked for 'No items'");
         logger.info("<<< Apparently we are in folder '" + foldername + "' and ready to enter contacts");
     }
 
@@ -392,7 +396,9 @@ public class InjectIntoWebmailAddressBook {
             verifyThatThisIsTheOverviewPage();
         }
         {
-            openContactsMenuFromTheOverviewPage(); // this may fail and the next test will fail too ; re-engineer this
+            openContactsMenuFromTheOverviewPage(); // this may fail and the next
+                                                   // test will fail too ;
+                                                   // re-engineer this
             verifyThatWeAreInInAddressBookMenu();
             makeSureTheListOfContactsFoldersIsVisible();
         }
@@ -442,20 +448,86 @@ public class InjectIntoWebmailAddressBook {
      * if a given "ClubMember" is detected as being a "committee member"
      */
 
-    public void addSubsetCommittee() {
-        Acceptor acceptor = new Acceptor() {
-            public boolean accept(ClubMember x) {
-                assert x != null;
-                return x.isCommittee();
-            }
+    private final Acceptor acceptorCommittee = new Acceptor() {
+        public boolean accept(ClubMember x) {
+            assert x != null;
+            return x.isCommittee();
+        }
 
-            public String getCompany(ClubMember x) {
-                assert x != null;
-                return "Comité ACL";
+        public String getCompany(ClubMember x) {
+            assert x != null;
+            return "Comité ACL";
+        }
+    };
+
+    private final Acceptor acceptorCeintureNoires = new Acceptor() {
+        public boolean accept(ClubMember x) {
+            assert x != null;
+            return x.isCeintureNoire();
+        }
+
+        public String getCompany(ClubMember x) {
+            assert x != null;
+            return "Ceinture Noire: " + ((x.level == null) ? "?" : x.level);
+        }
+    };
+
+    private final Acceptor acceptorEnfants = new Acceptor() {
+        public boolean accept(ClubMember x) {
+            assert x != null;
+            return x.isEnfant();
+        }
+
+        public String getCompany(ClubMember x) {
+            assert x != null;
+            return "Enfant âgé de: " + x.getAge() + " ans";
+        }
+    };
+
+    private final Acceptor acceptorAdultes = new Acceptor() {
+        public boolean accept(ClubMember x) {
+            assert x != null;
+            return x.isAdulte();
+        }
+
+        public String getCompany(ClubMember x) {
+            assert x != null;
+            return "Adulte âgé de: " + x.getAge() + " ans";
+        }
+    };
+
+    private final Acceptor acceptorEnfantsEtAdolescents = new Acceptor() {
+        public boolean accept(ClubMember x) {
+            assert x != null;
+            return x.getAge() < 19;
+        }
+
+        public String getCompany(ClubMember x) {
+            assert x != null;
+            return "Membre âgé de: " + x.getAge() + " ans";
+        }
+    };
+
+    private final Acceptor acceptorTousLesMembres = new Acceptor() {
+        public boolean accept(ClubMember x) {
+            return true;
+        }
+
+        public String getCompany(ClubMember x) {
+            assert x != null;
+            String res = "Membre âgé de: " + x.getAge() + " ans";
+            if (acceptorCeintureNoires.accept(x)) {
+                res += ", ceinture noire";
             }
-        };
-        createAddressbook(testTag + "### Subset: Comité ###", acceptor);
-    }
+            if (acceptorAdultes.accept(x)) {
+                res += ", adulte";
+            }
+            if (acceptorEnfants.accept(x)) {
+                res += ", enfant";
+            }
+            return res;
+        }
+    };
 
     /**
      * Proper action: Adding all the black belters. The "Acceptor" returns true
@@ -463,18 +535,7 @@ public class InjectIntoWebmailAddressBook {
      */
 
     public void addSubsetCeinturesNoires() {
-        Acceptor acceptor = new Acceptor() {
-            public boolean accept(ClubMember x) {
-                assert x != null;
-                return x.isCeintureNoire();
-            }
-
-            public String getCompany(ClubMember x) {
-                assert x != null;
-                return "Ceinture Noire: " + ((x.level == null) ? "?" : x.level);
-            }
-        };
-        createAddressbook(testTag + "### Subset: Ceintures Noires ###", acceptor);
+        createAddressbook(testTag + "### Subset: Ceintures Noires ###", acceptorCeintureNoires);
     }
 
     /**
@@ -483,18 +544,7 @@ public class InjectIntoWebmailAddressBook {
      */
 
     public void addSubsetEnfants() {
-        Acceptor acceptor = new Acceptor() {
-            public boolean accept(ClubMember x) {
-                assert x != null;
-                return x.isEnfant();
-            }
-
-            public String getCompany(ClubMember x) {
-                assert x != null;
-                return "Enfant âgé de: " + x.getAge() + " ans";
-            }
-        };
-        createAddressbook(testTag + "### Subset: Enfants ###", acceptor);
+        createAddressbook(testTag + "### Subset: Enfants ###", acceptorEnfants);
     }
 
     /**
@@ -503,18 +553,16 @@ public class InjectIntoWebmailAddressBook {
      */
 
     public void addSubsetAdultes() {
-        Acceptor acceptor = new Acceptor() {
-            public boolean accept(ClubMember x) {
-                assert x != null;
-                return x.isAdulte();
-            }
+        createAddressbook(testTag + "### Subset: Adultes ###", acceptorAdultes);
+    }
 
-            public String getCompany(ClubMember x) {
-                assert x != null;
-                return "Adulte âgé de: " + x.getAge() + " ans";
-            }
-        };
-        createAddressbook(testTag + "### Subset: Adultes ###", acceptor);
+    /**
+     * Proper action: Adding all all the people < 19. The "Acceptor" returns
+     * true if a given "ClubMember" is detected as being an "enfant/adolescent"
+     */
+
+    public void addSubsetEnfantsEtAdolescents() {
+        createAddressbook(testTag + "### Subset: Enfants et Adolescents ###", acceptorEnfantsEtAdolescents);
     }
 
     /**
@@ -522,18 +570,15 @@ public class InjectIntoWebmailAddressBook {
      */
 
     public void addSubsetTousLesMembres() {
-        Acceptor acceptor = new Acceptor() {
-            public boolean accept(ClubMember x) {
-                assert x != null;
-                return true;
-            }
+        createAddressbook(testTag + "### Tous les Membres du Club ###", acceptorTousLesMembres);
+    }
 
-            public String getCompany(ClubMember x) {
-                assert x != null;
-                return "Membre ACL";
-            }
-        };
-        createAddressbook(testTag + "### Tous les Membres du Club ###", acceptor);
+    /**
+     * Proper action: Adding committee members
+     */
+
+    public void addSubsetCommittee() {
+        createAddressbook(testTag + "### Subset: Comité ###", acceptorCommittee);
     }
 
     /**
@@ -569,9 +614,13 @@ public class InjectIntoWebmailAddressBook {
         //
         // POST can be very slow, thus:
         final int secondsToImplicityWait = 10;
+        //
         // Set this to empty in case of "production"
-        // final String testTag = "TEST";
-        final String testTag = "";
+        //
+        final String testTag = "TEST";
+        // final String testTag = "";
+        //
+        //
         for (Action ax : Actions.ACTION_SET) {
             InjectIntoWebmailAddressBook inj = null;
             try {
@@ -592,6 +641,9 @@ public class InjectIntoWebmailAddressBook {
                 case addSubsetTousLesMembres:
                     inj.addSubsetTousLesMembres();
                     break;
+                case addSubsetEnfantsEtAdolescents:
+                    inj.addSubsetEnfantsEtAdolescents();
+                    break;
                 default:
                     instaFail("Unknown action " + ax);
                 }
@@ -604,5 +656,6 @@ public class InjectIntoWebmailAddressBook {
                 }
             }
         }
+        logger.info("SUCCESS");
     }
 }

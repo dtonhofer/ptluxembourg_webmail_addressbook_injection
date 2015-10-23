@@ -16,15 +16,16 @@ import java.util.TreeSet;
 public class Actions {
 
     public enum Action {
-        addSubsetCommittee, addSubsetCeinturesNoires, addSubsetEnfants, addSubsetAdultes, addSubsetTousLesMembres
+        addSubsetCommittee, addSubsetCeinturesNoires, addSubsetEnfants, addSubsetAdultes, addSubsetTousLesMembres, addSubsetEnfantsEtAdolescents
     }
 
     public static SortedSet<Action> ACTION_SET = new TreeSet<Action>();
         
     static {
-    	ACTION_SET.add(Action.addSubsetCommittee);
+        ACTION_SET.add(Action.addSubsetCommittee);
     	ACTION_SET.add(Action.addSubsetCeinturesNoires);
     	ACTION_SET.add(Action.addSubsetEnfants);
+   	    ACTION_SET.add(Action.addSubsetEnfantsEtAdolescents);
     	ACTION_SET.add(Action.addSubsetAdultes);
     	ACTION_SET.add(Action.addSubsetTousLesMembres);
     }

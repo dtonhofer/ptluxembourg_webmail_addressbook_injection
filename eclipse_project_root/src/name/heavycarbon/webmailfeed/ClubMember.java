@@ -46,6 +46,18 @@ class ClubMember {
         this.isComite = isComite;
     }
 
+    // getAge may return null if unset!
+    
+    public Integer getAge() {
+        if (birthday != null) {
+            Interval iv = new Interval(birthday, new DateTime());
+            Period p = iv.toPeriod();
+            return p.getYears();
+        } else {
+            return null;
+        }
+    }
+
     public boolean isCommittee() {
         return isComite;
     }
@@ -53,24 +65,23 @@ class ClubMember {
     public boolean isCeintureNoire() {        
         return level != null && level.isDan;
     }
-
-    public int getAge() {
-        if (birthday != null) {
-            Interval iv = new Interval(birthday, new DateTime());
-            Period p = iv.toPeriod();
-            return p.getYears();
-        } else {
-            // some default value...
-            return 30;
-        }
-    }
-
+    
+    // We separate "adultes" and "enfants" (they pay different fees) at 14:
+    
     public boolean isAdulte() {
-        return getAge() >= 14;
+        return getAge()!=null && 14 <= getAge();
     }
+
+    // We separate "adultes" and "enfants" (they pay different fees) at 14:
 
     public boolean isEnfant() {
-        return !isAdulte();
+        return getAge()!=null && !isAdulte();
+    }
+
+    // "enfants ou adoslecent" is set to be below the age of 19:
+    
+    public boolean isEnfantOuAdolescent() {
+        return getAge()!=null && getAge() < 19;
     }
 
     @Override
