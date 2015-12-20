@@ -52,6 +52,10 @@ import name.heavycarbon.webmailfeed.Actions.Action;
  * 2013.04.XX - Created
  * 2013.06.14 - Cleanup
  * 2015.09.13 - Added "enfants & adolescents"
+ * 2015.12.20 - Entering a folder by clicking on it is now done using
+ *              a recursive call that clicks on the folder at each descent,
+ *              for a maximum of 3 times and checks whether the folder is open.
+ *              The previous code obviously didn't work.
  ******************************************************************************/
 
 public class InjectIntoWebmailAddressBook {
@@ -73,7 +77,8 @@ public class InjectIntoWebmailAddressBook {
     private final static Logger LOGGER_verifyThatThisIsTheOverviewPage = LoggerFactory.getLogger(CLASS + ".verifyThatThisIsTheOverviewPage");
     private final static Logger LOGGER_openListOfContactFolders = LoggerFactory.getLogger(CLASS + ".openListOfContactFolders");
     private final static Logger LOGGER_sleepabit = LoggerFactory.getLogger(CLASS + ".sleepabit");
-
+    private final static Logger LOGGER_checkPresenceOfListOfContactFolders = LoggerFactory.getLogger(CLASS + ".checkPresenceOfListOfContactFolders");
+    
     private final PropertiesReader config; // immutable configuration
     private final Set<ClubMember> allMembers; // immutable set of all the club
                                               // members
@@ -163,26 +168,38 @@ public class InjectIntoWebmailAddressBook {
         logger.info("<<< Apparently we are really in address book menu");
 
     }
-
-    private void openListOfContactFolders(String someString) {
-        Logger logger = LOGGER_openListOfContactFolders;
-        logger.info(">>> Aggressively clicking on the 'username' '" + config.getUsername() + "' to make the list of contact folders appear");
-        logger.info("...clicking once");
-        driver.findElement(By.xpath("(//a[contains(text(),'" + config.getUsername() + "')])[2]")).click();
-        logger.info("...waiting a bit");
-        sleepabit();
-        logger.info("...clicking again");
-        driver.findElement(By.xpath("(//a[contains(text(),'" + config.getUsername() + "')])[2]")).click();
-        logger.info("...waiting a bit");
-        sleepabit();
+    
+    private boolean checkPresenceOfListOfContactFolders(String someString) {
+        Logger logger = LOGGER_checkPresenceOfListOfContactFolders;        
         logger.info("Is the list of contacts there?");
-        if (!isElementPresent(By.xpath("//a[contains(text(),'" + someString + "')]"))) {
-            logger.info("...no -- clicking a third time");
-            driver.findElement(By.xpath("(//a[contains(text(),'" + config.getUsername() + "')])[2]")).click();
+        By element = By.xpath("//a[contains(text(),'" + someString + "')]");
+        return isElementPresent(element);
+    }
+    
+    private void openListOfContactFolders(String someString) {
+        openListOfContactFolders(someString,1);
+    }
+    
+    private void openListOfContactFolders(String someString, int depth) {
+        Logger logger = LOGGER_openListOfContactFolders;
+        checkTrue(depth <= 3, "Could not make the list of contact folders appear");
+        logger.info(">>> Clicking on the 'username' '" + config.getUsername() + "' to make the list of contact folders appear: attempt " + depth);
+        {
+            sleepabit();
+            By username = By.xpath("(//a[contains(text(),'" + config.getUsername() + "')])[2]"); 
+            driver.findElement(username).click(); // username may be gone before clicking??
             logger.info("...waiting a bit");
             sleepabit();
         }
-        logger.info("<<< The list of contact folders should now be there, in particular folder '" + someString + "'");
+        if (!checkPresenceOfListOfContactFolders(someString)) {
+            logger.info("...not there yet -- clicking again");
+            // >>>> recursive call
+            openListOfContactFolders(someString, depth+1);
+            // <<<<
+        }
+        else {
+            logger.info("<<< The list of contact folders should now be there, in particular folder '" + someString + "'");
+        }
     }
 
     private void makeSureTheListOfContactsFoldersIsVisible() {
@@ -335,7 +352,9 @@ public class InjectIntoWebmailAddressBook {
         sleepabit();
         openListOfContactFolders(foldername);
         logger.info("Entering folder '" + foldername + "'");
-        driver.findElement(By.xpath("//a[contains(text(),'" + foldername + "')]")).click();
+        sleepabit();
+        By folder = By.xpath("//a[contains(text(),'" + foldername + "')]"); // weirdly the folder may disappear (not be visible)
+        driver.findElement(folder).click();
         sleepabit();
         checkTrue(isElementPresent(By.id("icon_action_add")), "Looked for 'icon_action_add' action");
         checkTrue(driver.findElement(By.cssSelector("BODY")).getText().contains(foldername), "Looked for '" + foldername + "'");
