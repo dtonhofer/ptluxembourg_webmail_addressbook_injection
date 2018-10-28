@@ -1,10 +1,15 @@
 P&T Luxembourg Webmail Addressbook Injection
 =============================================
 
-What is this
-------------
+Status
+------
 
-*Definitely not of general interest*:
+- Released 2013
+- Unmaintained, of historical interest only
+- Definitely not of general interest
+
+What
+----
 
 Inject addressbook data into the P&amp;T Luxembourg webmail address book via its web interface using the Selenium WebDriver.
 
