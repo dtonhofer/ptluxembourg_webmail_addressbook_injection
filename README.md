@@ -1,15 +1,7 @@
-P&T Luxembourg Webmail Addressbook Injection
+# P&T Luxembourg Webmail Addressbook Injection
 =============================================
 
-Status
-------
-
-- Released 2013
-- Unmaintained, of historical interest only
-- Definitely not of general interest
-
-What
-----
+## What is this
 
 Inject addressbook data into the P&amp;T Luxembourg webmail address book via its web interface using the Selenium WebDriver.
 
@@ -37,3 +29,13 @@ Found to be of extremely valuable use in this endeavor:
 The look of that interface was somewhat updated end of 2013:
 
 ![The Webmail interface that we want to control](images/WebmailSnapshot_2014.png "The Webmail interface that we want to control, late 2013")
+
+## Status
+
+- Released 2013
+- Unmaintained, of historical interest only
+- Definitely not of general interest
+
+## License
+
+[MIT License](http://opensource.org/licenses/MIT)
