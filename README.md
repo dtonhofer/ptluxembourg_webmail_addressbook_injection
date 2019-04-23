@@ -1,5 +1,4 @@
 # P&T Luxembourg Webmail Addressbook Injection
-=============================================
 
 ## What is this
 
